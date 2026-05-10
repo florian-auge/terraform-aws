@@ -45,10 +45,10 @@ resource "aws_key_pair" "cle_florian" {
   public_key = file("~/.ssh/cle-florian.pub")
 }
 output "ec2_public_ip" {
-  value = aws_instance.mon_serveur.public_ip
+  value = aws_eip.eip_instance.public_ip
 }
 resource "local_file" "ansible_inventory" {
-  content  = "[ec2]\n${aws_instance.mon_serveur.public_ip} ansible_ssh_private_key_file=~/.ssh/cle-florian.pem\n"
+  content  = "[ec2]\n${aws_eip.eip_instance.public_ip} ansible_ssh_private_key_file=~/.ssh/cle-florian.pem\n"
   filename = "../ansible-test/inventory.ini"
 }
 resource "aws_vpc" "mon_vpc" {
@@ -73,4 +73,8 @@ resource "aws_route_table" "ma_route_table" {
 resource "aws_route_table_association" "mon_nom" {
   subnet_id      = aws_subnet.mon_vpc_subnet.id
   route_table_id = aws_route_table.ma_route_table.id
+}
+resource "aws_eip" "eip_instance" {
+  instance = aws_instance.mon_serveur.id
+  domain = "vpc"
 }
